@@ -1,10 +1,7 @@
-﻿import axios from "axios";
+import axios from "axios";
 
-// Centralized Axios instance
-// All frontend -> backend API calls go through this single instance.
-// baseURL is defined here and NOWHERE else.
 const api = axios.create({
-  baseURL: "http://localhost:5000/api/",
+  baseURL: import.meta.env.VITE_BACKEND_URL,
 });
 
 export default api;
