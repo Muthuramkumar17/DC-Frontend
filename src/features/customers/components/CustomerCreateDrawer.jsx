@@ -282,6 +282,8 @@ export default function CustomerCreateDrawer({
             </Alert>
           )}
 
+          {/* WhatsApp number is intentionally hidden for now; retain this code
+              so the field can be restored without changing the form model.
           <Controller
             name="sameAsMobile"
             control={control}
@@ -303,7 +305,7 @@ export default function CustomerCreateDrawer({
               fullWidth
               {...register("whatsapp")}
             />
-          )}
+          )} */}
 
           <Divider />
           <Typography variant="subtitle1">First Service Address</Typography>

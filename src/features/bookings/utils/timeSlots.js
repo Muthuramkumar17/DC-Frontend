@@ -38,9 +38,9 @@ export function buildTimeSlots(timeSlots, durationMinutes) {
         return [];
       }
 
-      const bufferMinutes = Number(
-        timeSlot.bufferTime || timeSlot.bufferMinutes || 0,
-      );
+      // Keep a fixed 15-minute separation between services so rendered slots
+      // and the day timeline cannot overlap because of stale slot settings.
+      const bufferMinutes = 15;
 
       const slots = [];
 

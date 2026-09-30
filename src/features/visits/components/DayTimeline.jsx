@@ -236,7 +236,7 @@ export default function DayTimeline({
               const customer = booking.customer || customerById[booking.customerId];
               const canComplete = booking.status === "scheduled";
 
-              const bufferMinutes = Number(booking.bufferMinutes || 30);
+              const bufferMinutes = 15;
               const bufferTop = top + renderedServiceHeight;
               const bufferHeight = (bufferMinutes / totalMin) * 100;
 
@@ -409,4 +409,3 @@ export default function DayTimeline({
     </Paper>
   );
 }
-

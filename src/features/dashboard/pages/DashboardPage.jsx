@@ -178,16 +178,11 @@ export default function DashboardPage() {
       // 2. Area Text Search Input
       if (areaSearch.trim()) {
         const query = areaSearch.trim().toLowerCase();
-        const areaName = (visit.customer?.area || "Unassigned").toLowerCase();
-        const rawArea = (visit.customer?.area || "").toLowerCase();
-        const customerName = (visit.customer?.name || "").toLowerCase();
-        const visitNum = (visit.visitNumber || "").toLowerCase();
-        const matchesAreaText =
-          areaName.includes(query) || rawArea.includes(query);
-        const matchesOtherText =
-          customerName.includes(query) || visitNum.includes(query);
+        const areaName = (visit.customer?.area || "Unassigned").toLocaleLowerCase();
 
-        if (!matchesAreaText && !matchesOtherText) return false;
+        // This control searches the Area column only. Searching customer names
+        // here made a one-letter query such as "m" match nearly every row.
+        if (!areaName.includes(query)) return false;
       }
 
       return true;
