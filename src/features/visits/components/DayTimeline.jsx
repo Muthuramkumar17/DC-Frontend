@@ -19,7 +19,7 @@ export default function DayTimeline({
   const timelineStartMin = dayStartMin;
   const timelineEndMin = dayEndMin;
   const totalMin = timelineEndMin - timelineStartMin;
-  const timelineHeight = 880;
+  const timelineHeight = 1300;
   const minCardHeightPercent = (80 / timelineHeight) * 100;
   const hourMarks = [];
   for (let time = timelineStartMin; time <= timelineEndMin; time += 60) {
@@ -236,9 +236,9 @@ export default function DayTimeline({
               const customer = booking.customer || customerById[booking.customerId];
               const canComplete = booking.status === "scheduled";
 
-              const bufferMinutes = 15;
+              const bufferMinutes = 30;
               const bufferTop = top + renderedServiceHeight;
-              const bufferHeight = (bufferMinutes / totalMin) * 100;
+              const bufferHeight = (bufferMinutes / totalMin) * 50;
 
               return (
                 <Box key={booking.id}>
