@@ -63,6 +63,30 @@ export async function getBookingMasters() {
     return prices;
   }, {});
 
+  // Pricing is configured per subscription plan, frequency, and bathroom
+  // count. Do not let records from another plan/frequency overwrite the price.
+  const priceBySelection = (pricing || []).reduce((prices, item) => {
+    const bathroomCount =
+      item.bathroomCountReference?.bathroomCount ??
+      item.bathroomCountId?.bathroomCount;
+    const frequencyId =
+      item.serviceFrequencyReference?._id ?? item.serviceFrequencyReference;
+    const subscriptionId =
+      item.subscriptionTypeReference?._id ?? item.subscriptionTypeReference;
+
+    if (
+      item.isActive !== false &&
+      bathroomCount != null &&
+      frequencyId != null &&
+      subscriptionId != null &&
+      item.price != null
+    ) {
+      prices[`${subscriptionId}:${frequencyId}:${bathroomCount}`] = item.price;
+    }
+
+    return prices;
+  }, {});
+
   const durationByBathroom = (pricing || []).reduce((durations, item) => {
     const bathroomCount =
       item.bathroomCountReference?.bathroomCount ??
@@ -127,6 +151,7 @@ export async function getBookingMasters() {
         timeGap: item.timeGap,
         termMonths: Math.max(1, Math.round(item.timeGap || 1)),
         pricePerServiceByBathroom: priceByBathroom,
+        priceBySelection,
       })),
 
     durationByBathroom: resolvedDurationByBathroom,
@@ -289,9 +314,7 @@ export async function getBooking(param) {
   const matchedPayment = (Array.isArray(payments) ? payments : []).find(
     (p) =>
       idMatch(p.booking) ||
-      idMatch(p.bookingId) ||
-      idMatch(p.customer) ||
-      idMatch(p.customerId),
+      idMatch(p.bookingId),
   );
 
   const matchedSub = (Array.isArray(subscriptions) ? subscriptions : []).find(
@@ -313,12 +336,23 @@ export async function getBooking(param) {
 
     ...(matchedPayment
       ? {
-          serviceCharges: Number(matchedPayment.baseAmount ?? normalized.serviceCharges ?? 0),
-          taxableAmount: Number(matchedPayment.baseAmount ?? normalized.taxableAmount ?? 0),
-          discount: Number(matchedPayment.discountAmount || 0),
+          // Keep each amount tied to the same payment calculation used by
+          // invoices. `baseAmount` is the taxable base; `totalBeforeDiscount`
+          // is the gross charge before the authorised discount.
+          serviceCharges: Number(
+            matchedPayment.totalBeforeDiscount ??
+              (Number(matchedPayment.totalAmount ?? 0) +
+                Number(matchedPayment.discountAmount ?? 0)) ??
+              normalized.serviceCharges ??
+              0,
+          ),
+          taxableAmount: Number(
+            matchedPayment.baseAmount ?? normalized.taxableAmount ?? 0,
+          ),
+          discount: Number(matchedPayment.discountAmount ?? 0),
           taxes: [
-            { id: "CGST", label: "CGST", rate: Number(matchedPayment.cgstRate || 0) / 100, amount: Number(matchedPayment.cgstAmount || 0) },
-            { id: "SGST", label: "SGST", rate: Number(matchedPayment.sgstRate || 0) / 100, amount: Number(matchedPayment.sgstAmount || 0) },
+            { id: "CGST", label: "CGST", rate: Number(matchedPayment.cgstRate ?? 0) / 100, amount: Number(matchedPayment.cgstAmount ?? 0) },
+            { id: "SGST", label: "SGST", rate: Number(matchedPayment.sgstRate ?? 0) / 100, amount: Number(matchedPayment.sgstAmount ?? 0) },
           ],
           total: Number(matchedPayment.totalAmount ?? normalized.total ?? 0),
         }

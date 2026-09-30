@@ -24,7 +24,10 @@ export function quotePricing({
     throw new Error("Invalid bathroom count selected for pricing.");
   }
 
-  const configuredPrice = plan.pricePerServiceByBathroom?.[bathroomCount];
+  const selectionKey = `${planId}:${frequencyId}:${bathroomCount}`;
+  const configuredPrice =
+    plan.priceBySelection?.[selectionKey] ??
+    plan.pricePerServiceByBathroom?.[bathroomCount];
 
   if (
     configuredPrice == null ||
